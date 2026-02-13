@@ -1,9 +1,6 @@
 package db
 
-import (
-	"database/sql"
-	"fmt"
-)
+import "fmt"
 
 type Book struct {
 	ID     int    `json:"id"`
@@ -14,22 +11,14 @@ type Book struct {
 }
 
 // добавление книги в бд и получение индентификатора последней добавленной книги
-func AddBook(book *Book) (int64, error) {
-	query := "INSERT INTO books (title, author, genre, pages) VALUES (:title, :author, :genre, :pages)"
+func AddBook(book *Book) error {
+	query := "INSERT INTO books (title, author, genre, pages) VALUES ($1, $2, $3, $4) RETURNING id"
 
-	result, err := db.Exec(query,
-		sql.Named("title", book.Title),
-		sql.Named("author", book.Title),
-		sql.Named("genre", book.Title),
-		sql.Named("pages", book.Title))
+	err := db.QueryRow(query, book.Title, book.Author, book.Genre, book.Pages).Scan(&book.ID)
 	if err != nil {
-		return 0, fmt.Errorf("add book: %w", err)
+		return fmt.Errorf("add book: %w", err)
 	}
 
-	id, err := result.LastInsertId()
-	if err != nil {
-		return 0, fmt.Errorf("get last id: %w", err)
-	}
+	return nil
 
-	return id, nil
 }
