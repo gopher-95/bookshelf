@@ -15,10 +15,10 @@ func main() {
 		log.Fatalf("не удалось подключиться к бд: %v", err)
 	}
 	defer db.Close()
+
 	log.Println("server is runnug on port :8080")
 
 	r := chi.NewRouter()
-
 	setupRoutes(r)
 
 	err = http.ListenAndServe(":8080", r)

@@ -1,15 +1,10 @@
 package main
 
 import (
-	"net/http"
-
 	"github.com/go-chi/chi"
+	"github.com/gopher-95/bookshelf/internal/api"
 )
 
 func setupRoutes(r *chi.Mux) {
-	r.Get("/", helloHandler)
-}
-
-func helloHandler(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("hello!"))
+	r.Post("/", api.AddBookHandler)
 }
