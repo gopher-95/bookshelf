@@ -8,7 +8,23 @@ import (
 	"github.com/gopher-95/bookshelf/internal/db"
 )
 
-// читаем тело запроса и отправляем его в базу данных, предварительно сериализовав данные из Json в обычный формат
+// фукнция получения книги из бд
+func GetAllBooks(w http.ResponseWriter, r *http.Request) {
+	books, err := db.GetBooks()
+	if err != nil {
+		jsonError(w, http.StatusInternalServerError, "cant get data from database")
+		return
+	}
+
+	w.Header().Set("Content-type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"message": "книги успешно получены",
+		"books":   books,
+	})
+}
+
+// функция добавления книги в бд
 func AddBookHandler(w http.ResponseWriter, r *http.Request) {
 	var book db.Book
 	data, err := io.ReadAll(r.Body)
