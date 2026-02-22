@@ -2,7 +2,6 @@ package db
 
 import "time"
 
-//основная структура
 type Book struct {
 	ID     int    `json:"id"`
 	Title  string `json:"title"`

@@ -10,7 +10,7 @@ import (
 // в глобальной переменной храним бд
 var db *sql.DB
 
-// создание таблицы users
+// таблица users
 const users string = `
 CREATE TABLE IF NOT EXISTS users (
 	id BIGSERIAL PRIMARY KEY,	
@@ -20,7 +20,7 @@ CREATE TABLE IF NOT EXISTS users (
 );
 `
 
-// создание таблицы books
+// таблица books
 const books string = `
 CREATE TABLE IF NOT EXISTS books (
 	id BIGSERIAL PRIMARY KEY,

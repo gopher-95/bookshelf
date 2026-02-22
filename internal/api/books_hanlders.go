@@ -2,7 +2,6 @@ package api
 
 import (
 	"encoding/json"
-	"io"
 	"net/http"
 	"strconv"
 
@@ -107,15 +106,8 @@ func GetAllBooks(w http.ResponseWriter, r *http.Request) {
 // функция добавления книги в бд
 func AddBookHandler(w http.ResponseWriter, r *http.Request) {
 	var book db.Book
-	data, err := io.ReadAll(r.Body)
-	defer r.Body.Close()
 
-	if err != nil {
-		jsonError(w, http.StatusInternalServerError, "unable to read the request body")
-		return
-	}
-
-	err = json.Unmarshal(data, &book)
+	err := json.NewDecoder(r.Body).Decode(&book)
 	if err != nil {
 		jsonError(w, http.StatusBadRequest, "invalid JSON format")
 		return
