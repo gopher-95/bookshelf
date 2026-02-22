@@ -10,4 +10,5 @@ func setupRoutes(r *chi.Mux) {
 	r.Get("/books", api.GetAllBooks)
 	r.Get("/books/{id}", api.GetBook)
 	r.Delete("/books/{id}", api.DeleteBook)
+	r.Get("/books/search", api.SearchBook)
 }

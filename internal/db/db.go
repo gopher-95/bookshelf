@@ -10,8 +10,18 @@ import (
 // в глобальной переменной храним бд
 var db *sql.DB
 
+// создание таблицы users
+const users string = `
+CREATE TABLE IF NOT EXISTS users (
+	id BIGSERIAL PRIMARY KEY,	
+	login TEXT NOT NULL UNIQUE,
+	password_hash TEXT NOT NULL,
+	created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+`
+
 // создание таблицы books
-const schema string = `
+const books string = `
 CREATE TABLE IF NOT EXISTS books (
 	id BIGSERIAL PRIMARY KEY,
 	title TEXT NOT NULL, 
@@ -24,22 +34,30 @@ CREATE TABLE IF NOT EXISTS books (
 // подключение к бд и создание таблицы
 func Init() error {
 	var err error
+
+	// строка подключения
 	connectString := "user=postgres password=12345 dbname=bookshelf_db sslmode=disable"
 	db, err = sql.Open("postgres", connectString)
 	if err != nil {
 		return fmt.Errorf("open failed: %w", err)
 	}
-
+	// проверка соединения с бд
 	err = db.Ping()
 	if err != nil {
 		return fmt.Errorf("ping failed: %w", err)
 	}
 
-	_, err = db.Exec(schema)
+	// выполнение запроса на создание таблицы books
+	_, err = db.Exec(books)
 	if err != nil {
-		return fmt.Errorf("unable to build database")
+		return fmt.Errorf("unable to build table books: %w", err)
 	}
 
+	// выполнение запроса на создание таблицы users
+	_, err = db.Exec(users)
+	if err != nil {
+		return fmt.Errorf("unable to build table users: %w", err)
+	}
 	return nil
 }
 

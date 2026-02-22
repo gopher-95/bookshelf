@@ -10,6 +10,27 @@ import (
 	"github.com/gopher-95/bookshelf/internal/db"
 )
 
+func SearchBook(w http.ResponseWriter, r *http.Request) {
+	author := r.URL.Query().Get("author")
+	if author == "" {
+		jsonError(w, http.StatusBadRequest, "invalid name of author")
+		return
+	}
+
+	books, err := db.AuthorSearch(author)
+	if err != nil {
+		jsonError(w, http.StatusInternalServerError, "failed to get books")
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"message": "книги по автору успешно получены",
+		"books":   books,
+	})
+}
+
 // функция получения одной книги
 func GetBook(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
