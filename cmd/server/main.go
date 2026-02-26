@@ -5,25 +5,31 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi"
+	"github.com/gopher-95/bookshelf/internal/config"
 	"github.com/gopher-95/bookshelf/internal/db"
 )
 
 func main() {
-	log.Println("подключение к бд")
-	err := db.Init()
+	cfg, err := config.Load()
 	if err != nil {
-		log.Fatalf("не удалось подключиться к бд: %v", err)
+		log.Fatal("Failed to load config:", err)
+	}
+
+	err = db.Init(cfg.DBConnectionString())
+	if err != nil {
+		log.Fatal("Failed to Init database:", err)
 	}
 	defer db.Close()
-
-	log.Println("server is runnug on port :8080")
 
 	r := chi.NewRouter()
 	setupRoutes(r)
 
-	err = http.ListenAndServe(":8080", r)
+	log.Println("Server runnig on port:", cfg.ServerPortString())
+	err = http.ListenAndServe(cfg.ServerPortString(), r)
 	if err != nil {
-		log.Println("server is not working error")
+		log.Fatal("Failed to run server", err)
 	}
+
+	log.Println("Server runnig on port:", cfg.ServerPortString())
 
 }

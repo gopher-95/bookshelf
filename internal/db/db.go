@@ -32,28 +32,26 @@ CREATE TABLE IF NOT EXISTS books (
 `
 
 // подключение к бд и создание таблицы
-func Init() error {
+func Init(connString string) error {
 	var err error
 
-	// строка подключения
-	connectString := "user=postgres password=12345 dbname=bookshelf_db sslmode=disable"
-	db, err = sql.Open("postgres", connectString)
+	//подключение к бд
+	db, err = sql.Open("postgres", connString)
 	if err != nil {
 		return fmt.Errorf("open failed: %w", err)
 	}
+
 	// проверка соединения с бд
 	err = db.Ping()
 	if err != nil {
 		return fmt.Errorf("ping failed: %w", err)
 	}
 
-	// выполнение запроса на создание таблицы books
 	_, err = db.Exec(books)
 	if err != nil {
 		return fmt.Errorf("unable to build table books: %w", err)
 	}
 
-	// выполнение запроса на создание таблицы users
 	_, err = db.Exec(users)
 	if err != nil {
 		return fmt.Errorf("unable to build table users: %w", err)
