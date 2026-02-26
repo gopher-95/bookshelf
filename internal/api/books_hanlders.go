@@ -28,6 +28,7 @@ func SearchBook(w http.ResponseWriter, r *http.Request) {
 		"message": "книги по автору успешно получены",
 		"books":   books,
 	})
+	jsonResponse(w, http.StatusOK, "книги по автору успешно получены", "books", books)
 }
 
 // функция получения одной книги
@@ -49,13 +50,7 @@ func GetBook(w http.ResponseWriter, r *http.Request) {
 		jsonError(w, http.StatusInternalServerError, "failed to get book")
 		return
 	}
-
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(map[string]interface{}{
-		"message": "книга успешно получена",
-		"book":    book,
-	})
+	jsonResponse(w, http.StatusOK, "книга успешно получена", "book", book)
 }
 
 // функция удаления книги из бд
@@ -77,14 +72,7 @@ func DeleteBook(w http.ResponseWriter, r *http.Request) {
 		jsonError(w, http.StatusInternalServerError, "failed to delete book")
 		return
 	}
-
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(map[string]interface{}{
-		"message": "книга успешно удалена",
-		"id":      intID,
-	})
-
+	jsonResponse(w, http.StatusOK, "книга успешно удалена", "id", intID)
 }
 
 // фукнция получения книг из бд
@@ -95,12 +83,7 @@ func GetAllBooks(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Header().Set("Content-type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(map[string]interface{}{
-		"message": "книги успешно получены",
-		"books":   books,
-	})
+	jsonResponse(w, http.StatusOK, "книги успешно получены", "books", books)
 }
 
 // функция добавления книги в бд
@@ -123,11 +106,5 @@ func AddBookHandler(w http.ResponseWriter, r *http.Request) {
 		jsonError(w, http.StatusInternalServerError, "failed to add book")
 		return
 	}
-
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(map[string]interface{}{
-		"message": "книга успешно добавлена",
-		"book":    book.Title,
-	})
+	jsonResponse(w, http.StatusCreated, "книга успешно добавлена", "book", book.Title)
 }

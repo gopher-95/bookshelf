@@ -2,9 +2,11 @@ package api
 
 import (
 	"encoding/json"
+	"io"
 	"net/http"
 
 	"github.com/gopher-95/bookshelf/internal/db"
+	"golang.org/x/crypto/bcrypt"
 )
 
 func RegisterHandler(w http.ResponseWriter, r *http.Request) {
@@ -32,11 +34,40 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 		jsonError(w, http.StatusInternalServerError, "failed to regist user")
 		return
 	}
+	jsonResponse(w, http.StatusOK, "пользователь добавлен", "id", id)
+}
 
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(map[string]interface{}{
-		"message": "пользователь добавлен",
-		"id":      id,
-	})
+func LoginHandler(w http.ResponseWriter, r *http.Request) {
+	var loginRequest db.LoginRequest
+
+	body, err := io.ReadAll(r.Body)
+	if err != nil {
+		jsonError(w, http.StatusBadRequest, "invalid body")
+		return
+	}
+
+	err = json.Unmarshal(body, &loginRequest)
+	if err != nil {
+		jsonError(w, http.StatusBadRequest, "")
+	}
+
+	correctLogin, err := db.CheckLogin(loginRequest.Login)
+	if err != nil {
+		jsonError(w, http.StatusBadRequest, "invalid request")
+		return
+	}
+
+	if correctLogin {
+		hashedPassword, err := db.GetPasswordHash(loginRequest.Login)
+		if err != nil {
+			jsonError(w, http.StatusInternalServerError, "database error")
+			return
+		}
+		err = bcrypt.CompareHashAndPassword(hashedPassword, []byte(loginRequest.Password))
+		if err != nil {
+			jsonError(w, http.StatusBadRequest, "incorrect password")
+			return
+		}
+	}
+
 }

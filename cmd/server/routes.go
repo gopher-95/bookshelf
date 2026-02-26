@@ -7,9 +7,9 @@ import (
 
 func setupRoutes(r *chi.Mux) {
 	r.Post("/add", api.AddBookHandler)
+	r.Post("/registration", api.RegisterHandler)
 	r.Get("/books", api.GetAllBooks)
 	r.Get("/books/{id}", api.GetBook)
-	r.Delete("/books/{id}", api.DeleteBook)
 	r.Get("/books/search", api.SearchBook)
-	r.Post("/registration", api.RegisterHandler)
+	r.Delete("/books/{id}", api.DeleteBook)
 }
