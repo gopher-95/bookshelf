@@ -8,6 +8,7 @@ import (
 func setupRoutes(r *chi.Mux) {
 	r.Post("/add", api.AddBookHandler)
 	r.Post("/registration", api.RegisterHandler)
+	r.Post("/entry", api.LoginHandler)
 	r.Get("/books", api.GetAllBooks)
 	r.Get("/books/{id}", api.GetBook)
 	r.Get("/books/search", api.SearchBook)

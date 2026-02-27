@@ -29,7 +29,4 @@ func main() {
 	if err != nil {
 		log.Fatal("Failed to run server", err)
 	}
-
-	log.Println("Server runnig on port:", cfg.ServerPortString())
-
 }

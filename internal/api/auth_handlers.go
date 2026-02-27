@@ -10,64 +10,63 @@ import (
 )
 
 func RegisterHandler(w http.ResponseWriter, r *http.Request) {
-	var user db.User
+	var regUser db.LoginRequest
 
-	err := json.NewDecoder(r.Body).Decode(&user)
+	user, err := io.ReadAll(r.Body)
+	defer r.Body.Close()
 	if err != nil {
-		jsonError(w, http.StatusBadRequest, "invalid JSON format")
+		jsonError(w, http.StatusBadRequest, "Invalid login or password")
 		return
 	}
 
-	if user.Login == "" || user.Password == "" {
-		jsonError(w, http.StatusBadRequest, "login or password incorrect")
-		return
-	}
-
-	hash, err := hashPassword(user.Password)
+	err = json.Unmarshal(user, &regUser)
 	if err != nil {
-		jsonError(w, http.StatusInternalServerError, "failed tp process password")
+		jsonError(w, http.StatusBadRequest, "Could not parse request data")
 		return
 	}
 
-	id, err := db.RegistUser(user.Login, hash)
+	hasedPassword, err := hashPassword(regUser.Password)
 	if err != nil {
-		jsonError(w, http.StatusInternalServerError, "failed to regist user")
+		jsonError(w, http.StatusInternalServerError, "Could not hash password")
 		return
 	}
-	jsonResponse(w, http.StatusOK, "пользователь добавлен", "id", id)
+
+	id, err := db.RegisterUser(regUser.Login, hasedPassword)
+	if err != nil {
+		jsonError(w, http.StatusInternalServerError, "Counld not get id")
+		return
+	}
+
+	jsonResponse(w, http.StatusCreated, "Пользователь успешно добавлен", "ID", id)
 }
 
 func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	var loginRequest db.LoginRequest
 
-	body, err := io.ReadAll(r.Body)
+	user, err := io.ReadAll(r.Body)
+	defer r.Body.Close()
 	if err != nil {
-		jsonError(w, http.StatusBadRequest, "invalid body")
+		jsonError(w, http.StatusBadRequest, "invalid credentials")
 		return
 	}
 
-	err = json.Unmarshal(body, &loginRequest)
+	err = json.Unmarshal(user, &loginRequest)
 	if err != nil {
-		jsonError(w, http.StatusBadRequest, "")
-	}
-
-	correctLogin, err := db.CheckLogin(loginRequest.Login)
-	if err != nil {
-		jsonError(w, http.StatusBadRequest, "invalid request")
+		jsonError(w, http.StatusBadRequest, "could not parse request data")
 		return
 	}
 
-	if correctLogin {
-		hashedPassword, err := db.GetPasswordHash(loginRequest.Login)
-		if err != nil {
-			jsonError(w, http.StatusInternalServerError, "database error")
-			return
-		}
-		err = bcrypt.CompareHashAndPassword(hashedPassword, []byte(loginRequest.Password))
-		if err != nil {
-			jsonError(w, http.StatusBadRequest, "incorrect password")
-			return
-		}
+	loginUser, err := db.LoginUser(loginRequest.Login)
+	if err != nil {
+		jsonError(w, http.StatusUnauthorized, "invalid credentials")
+		return
 	}
 
+	err = bcrypt.CompareHashAndPassword([]byte(loginUser.PasswordHash), []byte(loginRequest.Password))
+	if err != nil {
+		jsonError(w, http.StatusBadRequest, "invalid credentials")
+		return
+	}
+
+	jsonResponse(w, http.StatusOK, "Вы успешно вошли!", "id", loginUser.ID)
 }
